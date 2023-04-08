@@ -1,4 +1,5 @@
 import sys
+import uuid
 from django.utils.timezone import now
 try:
     from django.db import models
@@ -7,11 +8,10 @@ except Exception:
     sys.exit()
 
 from django.conf import settings
-import uuid
-
 
 # Instructor model
 class Instructor(models.Model):
+    id = models.AutoField(primary_key=True)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -25,6 +25,7 @@ class Instructor(models.Model):
 
 # Learner model
 class Learner(models.Model):
+    id = models.AutoField(primary_key=True)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -54,6 +55,7 @@ class Learner(models.Model):
 
 # Course model
 class Course(models.Model):
+    id = models.AutoField(primary_key=True)
     name = models.CharField(null=False, max_length=30, default='online course')
     image = models.ImageField(upload_to='course_images/')
     description = models.CharField(max_length=1000)
@@ -70,6 +72,7 @@ class Course(models.Model):
 
 # Lesson model
 class Lesson(models.Model):
+    id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=200, default="title")
     order = models.IntegerField(default=0)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
@@ -88,6 +91,7 @@ class Enrollment(models.Model):
         (HONOR, 'Honor'),
         (BETA, 'BETA')
     ]
+    id = models.AutoField(primary_key=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     date_enrolled = models.DateField(default=now)
@@ -101,19 +105,23 @@ class Enrollment(models.Model):
     # Has a grade point for each question
     # Has question content
     # Other fields and methods you would like to design
-#class Question(models.Model):
-    # Foreign key to lesson
-    # question text
-    # question grade/mark
+class Question(models.Model):
+    id = models.AutoField(primary_key=True)
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
+    courses = models.ManyToManyField(Course)
+    question_text = models.CharField(max_length=200)
+    question_grade = models.FloatField(default=1.0)
 
-    # <HINT> A sample model method to calculate if learner get the score of the question
-    #def is_get_score(self, selected_ids):
-    #    all_answers = self.choice_set.filter(is_correct=True).count()
-    #    selected_correct = self.choice_set.filter(is_correct=True, id__in=selected_ids).count()
-    #    if all_answers == selected_correct:
-    #        return True
-    #    else:
-    #        return False
+    def is_get_score(self, selected_ids):
+        all_answers = self.choice_set.filter(is_correct=True).count()
+        selected_correct = self.choice_set.filter(is_correct=True, id__in=selected_ids).count()
+        if all_answers == selected_correct:
+            return True
+        else:
+            return False
+
+    def __str__(self):
+        return "Question: " + self.question_text
 
 
 #  <HINT> Create a Choice Model with:
@@ -122,13 +130,40 @@ class Enrollment(models.Model):
     # Choice content
     # Indicate if this choice of the question is a correct one or not
     # Other fields and methods you would like to design
-# class Choice(models.Model):
+    #
+class Choice(models.Model):
+    A = 'A'
+    B = 'B'
+    C = 'C'
+    D = 'D'
+    CHOICE_ANSWER = [
+        (A, 'A'),
+        (B, 'B'),
+        (C, 'C'),
+        (D, 'D')
+    ]
+    id = models.AutoField(primary_key=True)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    choice_answer = models.CharField(max_length=200, choices=CHOICE_ANSWER)
+    is_correct = models.BooleanField(default=False)
+    answer = models.CharField(max_length=200, default='Enter an answer')
+
+    def __str__(self):
+        return self.choice_answer +" - "+ self.answer
 
 # <HINT> The submission model
 # One enrollment could have multiple submission
 # One submission could have multiple choices
 # One choice could belong to multiple submissions
-#class Submission(models.Model):
-#    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE)
-#    choices = models.ManyToManyField(Choice)
+class Submission(models.Model):
+    id = models.AutoField(primary_key=True)
+    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE)
+    choices = models.ManyToManyField(Choice)
+
 #    Other fields and methods you would like to design
+
+#class Submission_Choices(models.Model):
+#    id = models.AutoField(primary_key=True)
+#    submission = models.ForeignKey(Submission, on_delete=models.CASCADE)
+#    choice = models.ForeignKey(Choice, on_delete=models.CASCADE)
+    #choices = models.ManyToManyField(Choice)
