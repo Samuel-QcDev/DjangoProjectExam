@@ -80,8 +80,7 @@ class Lesson(models.Model):
 
 
 # Enrollment model
-# <HINT> Once a user enrolled a class, an enrollment entry should be created between the user and course
-# And we could use the enrollment to track information such as exam submissions
+
 class Enrollment(models.Model):
     AUDIT = 'audit'
     HONOR = 'honor'
@@ -100,11 +99,6 @@ class Enrollment(models.Model):
 
 
 # <HINT> Create a Question Model with:
-    # Used to persist question content for a course
-    # Has a One-To-Many (or Many-To-Many if you want to reuse questions) relationship with course
-    # Has a grade point for each question
-    # Has question content
-    # Other fields and methods you would like to design
 class Question(models.Model):
     id = models.AutoField(primary_key=True)
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
@@ -126,12 +120,6 @@ def is_get_score(self, selected_ids):
 
 
 #  <HINT> Create a Choice Model with:
-    # Used to persist choice content for a question
-    # One-To-Many (or Many-To-Many if you want to reuse choices) relationship with Question
-    # Choice content
-    # Indicate if this choice of the question is a correct one or not
-    # Other fields and methods you would like to design
-    #
 class Choice(models.Model):
     A = 'A'
     B = 'B'
@@ -163,8 +151,3 @@ class Submission(models.Model):
 
 #    Other fields and methods you would like to design
 
-#class Submission_Choices(models.Model):
-#    id = models.AutoField(primary_key=True)
-#    submission = models.ForeignKey(Submission, on_delete=models.CASCADE)
-#    choice = models.ForeignKey(Choice, on_delete=models.CASCADE)
-    #choices = models.ManyToManyField(Choice)
